@@ -45,7 +45,6 @@ void check_background_processes()
                 {
                     printf("[%d]+ Terminated by signal %d %s\n", bg_processes[i].id, WTERMSIG(status), bg_processes[i].command);
                 }
-                // Remove the finished process from the array
                 for (int j = i; j < bg_count - 1; ++j)
                 {
                     bg_processes[j] = bg_processes[j + 1];
@@ -59,18 +58,10 @@ void check_background_processes()
 
 int main(void)
 {
-    char *args[NV + 1]; /* command line arguments */
-    int should_run = 1; /* flag to determine when to exit program */
+    char *args[NV + 1];
+    int should_run = 1;
 
-    struct sigaction sa;
-    sa.sa_handler = handle_sigchld;
-    sa.sa_flags = SA_RESTART | SA_NOCLDSTOP;
-    sigemptyset(&sa.sa_mask);
-    if (sigaction(SIGCHLD, &sa, NULL) == -1)
-    {
-        perror("sigaction");
-        exit(1);
-    }
+    signal(SIGCHLD, handle_sigchld);
 
     while (should_run)
     {
@@ -80,16 +71,20 @@ int main(void)
             bg_done = 0;
         }
 
-        printf("osh>");
+        printf("msh>");
         fflush(stdout);
 
         if (!fgets(line, NL, stdin))
         {
+            if (feof(stdin))
+            {
+                printf("\n");
+                exit(0);
+            }
             perror("fgets");
             continue;
         }
 
-        // Remove newline character from input
         size_t length = strlen(line);
         if (length > 0 && line[length - 1] == '\n')
         {
@@ -151,6 +146,7 @@ int main(void)
         }
         else if (pid == 0)
         {
+            // Child process
             if (execvp(args[0], args) == -1)
             {
                 perror("execvp");
@@ -159,6 +155,7 @@ int main(void)
         }
         else
         {
+            // Parent process
             if (!background)
             {
                 if (waitpid(pid, NULL, 0) == -1)
