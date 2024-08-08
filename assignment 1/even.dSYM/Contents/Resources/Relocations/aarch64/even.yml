@@ -1,0 +1,9 @@
+---
+triple:          'arm64-apple-darwin'
+binary-path:     '/Users/congdeng/Documents/UoA Master/S03 - Operating System/OS0016/assignment 1/even'
+relocations:
+  - { offsetInCU: 0x26, offset: 0x26, size: 0x8, addend: 0x0, symName: _handle_sighup, symObjAddr: 0x0, symBinAddr: 0x100003D74, symSize: 0x28 }
+  - { offsetInCU: 0x41, offset: 0x41, size: 0x8, addend: 0x0, symName: _handle_sighup, symObjAddr: 0x0, symBinAddr: 0x100003D74, symSize: 0x28 }
+  - { offsetInCU: 0x65, offset: 0x65, size: 0x8, addend: 0x0, symName: _handle_sigint, symObjAddr: 0x28, symBinAddr: 0x100003D9C, symSize: 0x28 }
+  - { offsetInCU: 0x89, offset: 0x89, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0x50, symBinAddr: 0x100003DC4, symSize: 0x150 }
+...
