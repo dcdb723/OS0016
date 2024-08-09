@@ -27,6 +27,34 @@ void handle_sigchld(int sig)
     bg_done = 1;
 }
 
+// void check_background_processes()
+// {
+//     int status;
+//     pid_t pid;
+//     while ((pid = waitpid(-1, &status, WNOHANG)) > 0)
+//     {
+//         for (int i = 0; i < bg_count; ++i)
+//         {
+//             if (bg_processes[i].pid == pid)
+//             {
+//                 if (WIFEXITED(status))
+//                 {
+//                     printf("[%d]+ Done %s\n", bg_processes[i].id, bg_processes[i].command);
+//                 }
+//                 else if (WIFSIGNALED(status))
+//                 {
+//                     printf("[%d]+ Terminated by signal %d %s\n", bg_processes[i].id, WTERMSIG(status), bg_processes[i].command);
+//                 }
+//                 for (int j = i; j < bg_count - 1; ++j)
+//                 {
+//                     bg_processes[j] = bg_processes[j + 1];
+//                 }
+//                 --bg_count;
+//                 break;
+//             }
+//         }
+//     }
+// }
 void check_background_processes()
 {
     int status;
@@ -39,18 +67,20 @@ void check_background_processes()
             {
                 if (WIFEXITED(status))
                 {
-                    printf("[%d]+ Done %s\n", bg_processes[i].id, bg_processes[i].command);
+                    printf("[%d]+            Done %s\n", bg_processes[i].id, bg_processes[i].command);
                 }
                 else if (WIFSIGNALED(status))
                 {
-                    printf("[%d]+ Terminated by signal %d %s\n", bg_processes[i].id, WTERMSIG(status), bg_processes[i].command);
+                    printf("[%d]+            Terminated by signal %d %s\n", bg_processes[i].id, WTERMSIG(status), bg_processes[i].command);
                 }
+
+                // 将已完成的进程从数组中移除，并保持数组顺序
                 for (int j = i; j < bg_count - 1; ++j)
                 {
                     bg_processes[j] = bg_processes[j + 1];
                 }
                 --bg_count;
-                break;
+                break; // 处理完一个子进程后跳出循环，防止多次递减bg_count
             }
         }
     }
@@ -77,11 +107,11 @@ int main(void)
 
         if (!fgets(line, NL, stdin))
         {
-            if (feof(stdin))
-            {
-                printf("\n");
-                exit(0);
-            }
+            // if (feof(stdin))
+            // {
+            //     printf("\n");
+            //     exit(0);
+            // }
             // 禁用空 stdin 时打印的错误消息
             /*
             fprintf(stderr, "EOF pid %d feof %d ferror %d\n", getpid(),
@@ -129,17 +159,15 @@ int main(void)
 
         if (strcmp(args[0], "cd") == 0)
         {
-            if (args[1] == NULL)
+            // if (args[1] == NULL)
+            // {
+            //     fprintf(stderr, "cd: expected argument\n");
+            // }
+            if (chdir(args[1]) != 0)
             {
-                fprintf(stderr, "cd: expected argument\n");
+                perror("chdir");
             }
-            else
-            {
-                if (chdir(args[1]) != 0)
-                {
-                    perror("chdir");
-                }
-            }
+
             continue;
         }
 
